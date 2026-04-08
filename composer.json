@@ -1,5 +1,8 @@
 {
     "require": {
         "firebase/php-jwt": "^6.0"
+    },
+    "config": {
+        "optimize-autoloader": true
     }
 }

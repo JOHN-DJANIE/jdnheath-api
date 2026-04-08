@@ -2,13 +2,13 @@
 require_once "db.php";
 
 $pdo->exec("CREATE TABLE IF NOT EXISTS products (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
     category TEXT NOT NULL,
     price REAL NOT NULL,
     unit TEXT,
     rx INTEGER DEFAULT 0,
-    stock TEXT DEFAULT 'in',
+    stock TEXT 'in',
     rating REAL DEFAULT 0,
     reviews INTEGER DEFAULT 0,
     description TEXT,
@@ -16,15 +16,15 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS products (
 )");
 
 $pdo->exec("CREATE TABLE IF NOT EXISTS orders (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL,
     total REAL NOT NULL,
-    status TEXT DEFAULT 'processing',
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    status TEXT 'processing',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )");
 
 $pdo->exec("CREATE TABLE IF NOT EXISTS order_items (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     order_id INTEGER NOT NULL,
     product_id INTEGER NOT NULL,
     product_name TEXT NOT NULL,

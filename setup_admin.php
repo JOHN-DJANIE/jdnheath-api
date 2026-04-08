@@ -2,54 +2,54 @@
 require_once "db.php";
 
 $pdo->exec("CREATE TABLE IF NOT EXISTS admins (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
-    role TEXT DEFAULT 'admin',
-    last_login DATETIME,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    role TEXT 'admin',
+    last_login TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )");
 
 $pdo->exec("CREATE TABLE IF NOT EXISTS platform_settings (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     key TEXT UNIQUE NOT NULL,
     value TEXT,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )");
 
 $pdo->exec("CREATE TABLE IF NOT EXISTS admin_logs (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     admin_id INTEGER,
     action TEXT NOT NULL,
     details TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )");
 
 $pdo->exec("CREATE TABLE IF NOT EXISTS insurance_claims (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL,
     nhia_number TEXT NOT NULL,
     claim_type TEXT NOT NULL,
     amount REAL,
     consultation_id INTEGER,
     order_id INTEGER,
-    status TEXT DEFAULT 'pending',
+    status TEXT 'pending',
     notes TEXT,
     processed_by INTEGER,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )");
 
 $pdo->exec("CREATE TABLE IF NOT EXISTS nhia_members (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL,
     nhia_number TEXT UNIQUE NOT NULL,
-    membership_type TEXT DEFAULT 'standard',
-    status TEXT DEFAULT 'active',
+    membership_type TEXT 'standard',
+    status TEXT 'active',
     expiry_date TEXT,
     verified INTEGER DEFAULT 0,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )");
 
 $existing = $pdo->query("SELECT id FROM admins WHERE email = 'admin@jdnhealth.com'")->fetch();

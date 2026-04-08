@@ -11,9 +11,9 @@ $columns = [
     "ALTER TABLE doctors ADD COLUMN years_experience INTEGER DEFAULT 0",
     "ALTER TABLE doctors ADD COLUMN consultation_fee REAL DEFAULT 0",
     "ALTER TABLE doctors ADD COLUMN is_verified INTEGER DEFAULT 0",
-    "ALTER TABLE doctors ADD COLUMN working_days TEXT DEFAULT 'Mon,Tue,Wed,Thu,Fri'",
-    "ALTER TABLE doctors ADD COLUMN working_hours_start TEXT DEFAULT '08:00'",
-    "ALTER TABLE doctors ADD COLUMN working_hours_end TEXT DEFAULT '17:00'",
+    "ALTER TABLE doctors ADD COLUMN working_days TEXT 'Mon,Tue,Wed,Thu,Fri'",
+    "ALTER TABLE doctors ADD COLUMN working_hours_start TEXT '08:00'",
+    "ALTER TABLE doctors ADD COLUMN working_hours_end TEXT '17:00'",
     "ALTER TABLE doctors ADD COLUMN max_patients_per_day INTEGER DEFAULT 20",
     "ALTER TABLE doctors ADD COLUMN total_earnings REAL DEFAULT 0",
     "ALTER TABLE doctors ADD COLUMN total_consultations INTEGER DEFAULT 0",
@@ -25,7 +25,7 @@ foreach ($columns as $sql) {
 
 // Create prescriptions table
 $pdo->exec("CREATE TABLE IF NOT EXISTS prescriptions (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     doctor_id INTEGER NOT NULL,
     patient_id INTEGER NOT NULL,
     consultation_id INTEGER,
@@ -33,30 +33,30 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS prescriptions (
     medications TEXT,
     instructions TEXT,
     follow_up_date TEXT,
-    status TEXT DEFAULT 'active',
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    status TEXT 'active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )");
 
 // Create doctor availability slots table
 $pdo->exec("CREATE TABLE IF NOT EXISTS availability_slots (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     doctor_id INTEGER NOT NULL,
     date TEXT NOT NULL,
     time_slot TEXT NOT NULL,
     is_booked INTEGER DEFAULT 0,
     consultation_id INTEGER,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )");
 
 // Create doctor earnings table
 $pdo->exec("CREATE TABLE IF NOT EXISTS doctor_earnings (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     doctor_id INTEGER NOT NULL,
     consultation_id INTEGER,
     amount REAL NOT NULL,
-    type TEXT DEFAULT 'consultation',
-    status TEXT DEFAULT 'pending',
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    type TEXT 'consultation',
+    status TEXT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )");
 
 // Seed doctor accounts (link doctors to user accounts)

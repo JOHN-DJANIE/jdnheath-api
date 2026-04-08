@@ -2,7 +2,7 @@
 require_once "db.php";
 
 $pdo->exec("CREATE TABLE IF NOT EXISTS doctors (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
     specialty TEXT NOT NULL,
     hospital TEXT,
@@ -10,7 +10,7 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS doctors (
     rating REAL DEFAULT 0,
     reviews INTEGER DEFAULT 0,
     price REAL NOT NULL,
-    availability TEXT DEFAULT 'Available Today',
+    availability TEXT 'Available Today',
     avatar TEXT,
     bio TEXT,
     conditions TEXT,
@@ -18,9 +18,9 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS doctors (
 )");
 
 $pdo->exec("CREATE TABLE IF NOT EXISTS hospitals (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
-    type TEXT DEFAULT 'General',
+    type TEXT 'General',
     location TEXT NOT NULL,
     region TEXT,
     phone TEXT,
@@ -29,12 +29,12 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS hospitals (
     reviews INTEGER DEFAULT 0,
     departments TEXT,
     facilities TEXT,
-    opening_hours TEXT DEFAULT '24/7',
+    opening_hours TEXT '24/7',
     is_active INTEGER DEFAULT 1
 )");
 
 $pdo->exec("CREATE TABLE IF NOT EXISTS consultations (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL,
     doctor_id INTEGER,
     hospital_id INTEGER,
@@ -43,9 +43,9 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS consultations (
     appointment_time TEXT,
     symptoms TEXT,
     notes TEXT,
-    status TEXT DEFAULT 'pending',
+    status TEXT 'pending',
     total_price REAL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )");
 
 $docCount = $pdo->query("SELECT COUNT(*) FROM doctors")->fetchColumn();

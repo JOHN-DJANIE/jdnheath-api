@@ -55,7 +55,7 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS nhia_members (
 $existing = $pdo->query("SELECT id FROM admins WHERE email = 'admin@jdnhealth.com'")->fetch();
 if (!$existing) {
     $password = password_hash("Admin1234", PASSWORD_BCRYPT);
-    $pdo->prepare("INSERT INTO admins (name, email, password, role) VALUES (?,?,?,?)")
+    $pdo->prepare("INSERT INTO admins (name, email, password, role) VALUES (?,?,?,?) ON CONFLICT DO NOTHING")
         ->execute(["JDNHealth Admin", "admin@jdnhealth.com", $password, "superadmin"]);
 }
 
@@ -68,7 +68,7 @@ $settings = [
     ["nhia_integration", "1"],
     ["commission_rate", "10"],
 ];
-$stmt = $pdo->prepare("INSERT OR IGNORE INTO platform_settings (key, value) VALUES (?,?)");
+$stmt = $pdo->prepare("INSERT INTO platform_settings (key, value) VALUES (?,?) ON CONFLICT DO NOTHING");
 foreach ($settings as $s) { $stmt->execute($s); }
 
 echo json_encode([

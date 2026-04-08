@@ -48,7 +48,7 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS order_items (
 // Seed products
 $count = $pdo->query("SELECT COUNT(*) FROM products")->fetchColumn();
 if ($count == 0) {
-    $stmt = $pdo->prepare("INSERT INTO products (name, category, price, unit, rx_required, stock, rating, reviews, description, manufacturer) VALUES (?,?,?,?,?,?,?,?,?,?)");
+    $stmt = $pdo->prepare("INSERT INTO products (name, category, price, unit, rx_required, stock, rating, reviews, description, manufacturer) VALUES (?,?,?,?,?,?,?,?,?,?) ON CONFLICT DO NOTHING");
     $products = [
         ["Amoxicillin 500mg", "antibiotic", 28, "pack of 21", 1, "in", 4.8, 142, "Broad-spectrum penicillin antibiotic for bacterial infections.", "Kinapharma Ltd"],
         ["Paracetamol 1000mg", "analgesic", 12.5, "pack of 24", 0, "in", 4.9, 891, "Effective pain and fever relief for adults.", "Ernest Chemists"],

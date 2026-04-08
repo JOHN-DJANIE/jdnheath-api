@@ -11,7 +11,7 @@ try {
         ["University of Ghana Medical Centre", "Teaching Hospital", "Accra", "Greater Accra", "+233 302 213 800", "General Medicine, Research, Specialist Care", 4.7, 1],
         ["Cape Coast Teaching Hospital", "Teaching Hospital", "Cape Coast", "Central", "+233 332 132 205", "General Medicine, Surgery, Pediatrics, Maternity", 4.2, 1],
     ];
-    $stmt = $pdo->prepare("INSERT OR IGNORE INTO hospitals (name, type, location, region, phone, departments, rating, is_active) VALUES (?,?,?,?,?,?,?,?)");
+    $stmt = $pdo->prepare("INSERT INTO hospitals (name, type, location, region, phone, departments, rating, is_active) VALUES (?,?,?,?,?,?,?,?) ON CONFLICT DO NOTHING");
     foreach ($hospitals as $h) {
         $stmt->execute($h);
     }

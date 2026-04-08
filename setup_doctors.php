@@ -64,7 +64,7 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS consultations (
 
 $docCount = $pdo->query("SELECT COUNT(*) FROM doctors")->fetchColumn();
 if ($docCount == 0) {
-    $stmt = $pdo->prepare("INSERT INTO doctors (name, specialty, hospital, location, rating, reviews, price, availability, avatar, bio, conditions) VALUES (?,?,?,?,?,?,?,?,?,?,?)");
+    $stmt = $pdo->prepare("INSERT INTO doctors (name, specialty, hospital, location, rating, reviews, price, availability, avatar, bio, conditions) VALUES (?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT DO NOTHING");
     $doctors = [
         ["Dr. Ama Owusu", "Internal Medicine & Cardiology", "Korle Bu Teaching Hospital", "Accra", 4.9, 312, 180, "Available Today", "AO", "Specialist in cardiovascular diseases and internal medicine with over 15 years experience.", "chest pain,hypertension,fatigue,shortness of breath"],
         ["Dr. Kweku Asante", "Pediatrics & Child Health", "37 Military Hospital", "Accra", 4.8, 245, 150, "Available Today", "KA", "Dedicated pediatrician providing comprehensive child healthcare from newborns to teenagers.", "fever,cough,vomiting,child health"],
@@ -82,7 +82,7 @@ if ($docCount == 0) {
 
 $hospCount = $pdo->query("SELECT COUNT(*) FROM hospitals")->fetchColumn();
 if ($hospCount == 0) {
-    $stmt = $pdo->prepare("INSERT INTO hospitals (name, type, location, region, phone, email, rating, reviews, departments, facilities, opening_hours) VALUES (?,?,?,?,?,?,?,?,?,?,?)");
+    $stmt = $pdo->prepare("INSERT INTO hospitals (name, type, location, region, phone, email, rating, reviews, departments, facilities, opening_hours) VALUES (?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT DO NOTHING");
     $hospitals = [
         ["Korle Bu Teaching Hospital", "Teaching Hospital", "Guggisberg Ave, Accra", "Greater Accra", "+233 302 674 418", "info@kbth.gov.gh", 4.6, 1842, "Cardiology,Neurology,Oncology,Pediatrics,Surgery,Emergency,Radiology", "ICU,MRI,CT Scan,Laboratory,Pharmacy,Ambulance", "24/7"],
         ["Komfo Anokye Teaching Hospital", "Teaching Hospital", "Okomfo Anokye Rd, Kumasi", "Ashanti", "+233 322 022 301", "info@kath.gov.gh", 4.5, 1523, "General Medicine,Surgery,Pediatrics,Maternity,Orthopedics,Psychiatry", "ICU,Laboratory,Blood Bank,Pharmacy,Ambulance", "24/7"],

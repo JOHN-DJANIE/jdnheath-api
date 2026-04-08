@@ -5,7 +5,7 @@ require_once "db.php";
 $columns = [
     "ALTER TABLE users ADD COLUMN nhia_number TEXT",
     "ALTER TABLE users ADD COLUMN profile_photo TEXT",
-    "ALTER TABLE users ADD COLUMN role TEXT 'patient'",
+    "ALTER TABLE users ADD COLUMN role TEXT DEFAULT 'patient'",
     "ALTER TABLE users ADD COLUMN is_verified INTEGER DEFAULT 0",
     "ALTER TABLE users ADD COLUMN verification_code TEXT",
     "ALTER TABLE users ADD COLUMN verification_expires INTEGER",
@@ -35,7 +35,7 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS auth_logs (
     action TEXT NOT NULL,
     ip_address TEXT,
     user_agent TEXT,
-    status TEXT 'success',
+    status TEXT DEFAULT 'success',
     details TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )");

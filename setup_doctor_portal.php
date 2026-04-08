@@ -11,9 +11,9 @@ $columns = [
     "ALTER TABLE doctors ADD COLUMN years_experience INTEGER DEFAULT 0",
     "ALTER TABLE doctors ADD COLUMN consultation_fee REAL DEFAULT 0",
     "ALTER TABLE doctors ADD COLUMN is_verified INTEGER DEFAULT 0",
-    "ALTER TABLE doctors ADD COLUMN working_days TEXT 'Mon,Tue,Wed,Thu,Fri'",
-    "ALTER TABLE doctors ADD COLUMN working_hours_start TEXT '08:00'",
-    "ALTER TABLE doctors ADD COLUMN working_hours_end TEXT '17:00'",
+    "ALTER TABLE doctors ADD COLUMN working_days TEXT DEFAULT 'Mon,Tue,Wed,Thu,Fri'",
+    "ALTER TABLE doctors ADD COLUMN working_hours_start TEXT DEFAULT '08:00'",
+    "ALTER TABLE doctors ADD COLUMN working_hours_end TEXT DEFAULT '17:00'",
     "ALTER TABLE doctors ADD COLUMN max_patients_per_day INTEGER DEFAULT 20",
     "ALTER TABLE doctors ADD COLUMN total_earnings REAL DEFAULT 0",
     "ALTER TABLE doctors ADD COLUMN total_consultations INTEGER DEFAULT 0",
@@ -33,7 +33,7 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS prescriptions (
     medications TEXT,
     instructions TEXT,
     follow_up_date TEXT,
-    status TEXT 'active',
+    status TEXT DEFAULT 'active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )");
 
@@ -54,8 +54,8 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS doctor_earnings (
     doctor_id INTEGER NOT NULL,
     consultation_id INTEGER,
     amount REAL NOT NULL,
-    type TEXT 'consultation',
-    status TEXT 'pending',
+    type TEXT DEFAULT 'consultation',
+    status TEXT DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )");
 

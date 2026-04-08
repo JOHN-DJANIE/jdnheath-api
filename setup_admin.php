@@ -6,7 +6,7 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS admins (
     name TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
-    role TEXT 'admin',
+    role TEXT DEFAULT 'admin',
     last_login TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )");
@@ -34,7 +34,7 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS insurance_claims (
     amount REAL,
     consultation_id INTEGER,
     order_id INTEGER,
-    status TEXT 'pending',
+    status TEXT DEFAULT 'pending',
     notes TEXT,
     processed_by INTEGER,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -45,8 +45,8 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS nhia_members (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL,
     nhia_number TEXT UNIQUE NOT NULL,
-    membership_type TEXT 'standard',
-    status TEXT 'active',
+    membership_type TEXT DEFAULT 'standard',
+    status TEXT DEFAULT 'active',
     expiry_date TEXT,
     verified INTEGER DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

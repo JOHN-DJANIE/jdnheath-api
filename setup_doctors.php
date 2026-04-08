@@ -10,7 +10,7 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS doctors (
     rating REAL DEFAULT 0,
     reviews INTEGER DEFAULT 0,
     price REAL NOT NULL,
-    availability TEXT 'Available Today',
+    availability TEXT DEFAULT 'Available Today',
     avatar TEXT,
     bio TEXT,
     conditions TEXT,
@@ -20,7 +20,7 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS doctors (
 $pdo->exec("CREATE TABLE IF NOT EXISTS hospitals (
     id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
-    type TEXT 'General',
+    type TEXT DEFAULT 'General',
     location TEXT NOT NULL,
     region TEXT,
     phone TEXT,
@@ -29,7 +29,7 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS hospitals (
     reviews INTEGER DEFAULT 0,
     departments TEXT,
     facilities TEXT,
-    opening_hours TEXT '24/7',
+    opening_hours TEXT DEFAULT '24/7',
     is_active INTEGER DEFAULT 1
 )");
 
@@ -43,7 +43,7 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS consultations (
     appointment_time TEXT,
     symptoms TEXT,
     notes TEXT,
-    status TEXT 'pending',
+    status TEXT DEFAULT 'pending',
     total_price REAL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )");

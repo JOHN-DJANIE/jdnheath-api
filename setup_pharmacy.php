@@ -8,7 +8,7 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS products (
     price REAL NOT NULL,
     unit TEXT,
     rx INTEGER DEFAULT 0,
-    stock TEXT 'in',
+    stock TEXT DEFAULT 'in',
     rating REAL DEFAULT 0,
     reviews INTEGER DEFAULT 0,
     description TEXT,
@@ -19,7 +19,7 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS orders (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL,
     total REAL NOT NULL,
-    status TEXT 'processing',
+    status TEXT DEFAULT 'processing',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )");
 

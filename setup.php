@@ -6,7 +6,7 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS users (
     name TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
-    role TEXT 'patient',
+    role TEXT DEFAULT 'patient',
     phone TEXT,
     date_of_birth TEXT,
     gender TEXT,
@@ -36,7 +36,7 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS appointments (
     specialty TEXT,
     appointment_date TEXT NOT NULL,
     appointment_time TEXT NOT NULL,
-    status TEXT 'scheduled',
+    status TEXT DEFAULT 'scheduled',
     notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )");

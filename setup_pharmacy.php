@@ -1,6 +1,19 @@
 <?php
 require_once "db.php";
 
+$alterCols = [
+    "ALTER TABLE products ADD COLUMN IF NOT EXISTS category VARCHAR(50)",
+    "ALTER TABLE products ADD COLUMN IF NOT EXISTS rx_required BOOLEAN DEFAULT FALSE",
+    "ALTER TABLE products ADD COLUMN IF NOT EXISTS stock VARCHAR(20) DEFAULT 'in_stock'",
+    "ALTER TABLE products ADD COLUMN IF NOT EXISTS manufacturer VARCHAR(255)",
+    "ALTER TABLE products ADD COLUMN IF NOT EXISTS unit VARCHAR(50)",
+    "ALTER TABLE products ADD COLUMN IF NOT EXISTS rating DECIMAL(3,1) DEFAULT 4.0",
+    "ALTER TABLE products ADD COLUMN IF NOT EXISTS reviews INTEGER DEFAULT 0",
+];
+foreach ($alterCols as $sql) {
+    try { $pdo->exec($sql); } catch (Exception $e) {}
+}
+
 $pdo->exec("CREATE TABLE IF NOT EXISTS products (
     id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,

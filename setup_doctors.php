@@ -1,6 +1,20 @@
 <?php
 require_once "db.php";
 
+// Add missing columns if they dont exist
+$alterCols = [
+    "ALTER TABLE doctors ADD COLUMN IF NOT EXISTS location VARCHAR(255)",
+    "ALTER TABLE doctors ADD COLUMN IF NOT EXISTS consultation_fee DECIMAL(10,2) DEFAULT 0",
+    "ALTER TABLE doctors ADD COLUMN IF NOT EXISTS experience INTEGER DEFAULT 0",
+    "ALTER TABLE doctors ADD COLUMN IF NOT EXISTS languages VARCHAR(255)",
+    "ALTER TABLE doctors ADD COLUMN IF NOT EXISTS education TEXT",
+    "ALTER TABLE doctors ADD COLUMN IF NOT EXISTS certifications TEXT",
+    "ALTER TABLE doctors ADD COLUMN IF NOT EXISTS is_available BOOLEAN DEFAULT TRUE",
+];
+foreach ($alterCols as $sql) {
+    try { $pdo->exec($sql); } catch (Exception $e) {}
+}
+
 $pdo->exec("CREATE TABLE IF NOT EXISTS doctors (
     id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,

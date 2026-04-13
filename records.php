@@ -36,7 +36,7 @@ elseif ($method === "PUT") {
 
 elseif ($method === "DELETE") {
     $id = $_GET["id"] ?? null;
-    $stmt = $pdo->prepare("DELETE FROM health_records WHERE id = ? AND user_id = ?");
+    $stmt = $pdo->prepare("UPDATE records SET deleted_at = CURRENT_TIMESTAMP WHERE id = ? AND user_id = ?");
     $stmt->execute([$id, $userId]);
     echo json_encode(["message" => "Record deleted."]);
 }
@@ -45,3 +45,4 @@ else {
     http_response_code(404);
     echo json_encode(["error" => "Route not found."]);
 }
+

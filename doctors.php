@@ -14,7 +14,7 @@ if ($method === "GET" && $action === "one" && $id) {
 } elseif ($method === "GET") {
     $specialty = $_GET["specialty"] ?? "";
     $search = $_GET["search"] ?? "";
-    $sql = "SELECT * FROM doctors WHERE is_active = 1";
+    $sql = "SELECT * FROM doctors WHERE is_active = TRUE AND is_verified = 1 AND verification_status = 'approved'";
     $params = [];
     if ($specialty) { $sql .= " AND specialty LIKE ?"; $params[] = "%$specialty%"; }
     if ($search) { $sql .= " AND (name LIKE ? OR specialty LIKE ? OR conditions LIKE ?)"; $params[] = "%$search%"; $params[] = "%$search%"; $params[] = "%$search%"; }

@@ -4,7 +4,7 @@ require_once "cors.php";
 require_once "db.php";
 require_once "auth_helper.php";
 
-define("DAILY_API_KEY", "3d8b1f2d5abae45232f19b0f312c6dab7506a4536f4e04086053562ba28f6f35");
+define("DAILY_API_KEY", getenv("DAILY_API_KEY") ?: "3d8b1f2d5abae45232f19b0f312c6dab7506a4536f4e04086053562ba28f6f35");
 define("DAILY_BASE_URL", "https://api.daily.co/v1");
 
 function flexVerifyToken() {
@@ -13,7 +13,7 @@ function flexVerifyToken() {
     if (!$auth || !str_starts_with($auth, "Bearer ")) { http_response_code(401); echo json_encode(["error" => "No token provided."]); exit; }
     $token = substr($auth, 7);
     try {
-        return (array) \Firebase\JWT\JWT::decode($token, new \Firebase\JWT\Key("jdnhealth_gh_super_secret_key_for_jwt_authentication_2026_secure", "HS256"));
+        return (array) \Firebase\JWT\JWT::decode($token, new \Firebase\JWT\Key(getenv("JWT_SECRET") ?: "jdnhealth_gh_super_secret_key_for_jwt_authentication_2026_secure", "HS256"));
     } catch (Exception $e) { http_response_code(403); echo json_encode(["error" => "Invalid token."]); exit; }
 }
 
@@ -75,3 +75,5 @@ elseif ($method === "DELETE" && $action === "room") {
     echo json_encode(["message" => "Room deleted."]);
 }
 else { http_response_code(404); echo json_encode(["error" => "Route not found."]); }
+
+

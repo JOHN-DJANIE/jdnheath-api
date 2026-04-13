@@ -3,6 +3,7 @@ error_reporting(0); ini_set("display_errors", 0);
 require_once "cors.php";
 require_once "db.php";
 require_once "auth_helper.php";
+require_once "ratelimit.php";
 
 $method = $_SERVER["REQUEST_METHOD"];
 $action = $_GET["action"] ?? "";
@@ -20,6 +21,7 @@ function verifyAdmin($pdo) {
 }
 
 if ($method === "POST" && $action === "login") {
+    checkRateLimit($pdo, "login", $RATE_LIMITS);
     $data = json_decode(file_get_contents("php://input"), true);
     $email = trim($data["email"] ?? "");
     $password = $data["password"] ?? "";

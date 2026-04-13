@@ -1,8 +1,13 @@
 {
     "require": {
-        "firebase/php-jwt": "^6.0"
+        "firebase/php-jwt": "^6.0",
+        "tecnickcom/tcpdf": "^6.6"
     },
     "config": {
-        "optimize-autoloader": true
+        "optimize-autoloader": true,
+        "audit": {
+            "abandoned": "ignore",
+            "block-insecure": false
+        }
     }
 }

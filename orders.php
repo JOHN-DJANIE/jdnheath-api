@@ -34,17 +34,41 @@ elseif ($method === "POST" && isset($_GET["action"]) && $_GET["action"] === "pre
         echo json_encode(["error" => "File too large. Maximum 5MB."]);
         exit;
     }
-    $uploadDir = __DIR__ . "/uploads/prescriptions/";
-    if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
-    $ext = pathinfo($file["name"], PATHINFO_EXTENSION);
-    $filename = "rx_" . $userId . "_" . time() . "." . $ext;
-    $filepath = $uploadDir . $filename;
-    if (move_uploaded_file($file["tmp_name"], $filepath)) {
-        $url = "/jdnhealth-api/uploads/prescriptions/" . $filename;
-        echo json_encode(["success" => true, "url" => $url, "filename" => $filename]);
-    } else {
+    try {
+        // Virus scan before upload
+        require_once "virusscan.php";
+        $scanResult = scanFileForVirus($file["tmp_name"], $file["name"]);
+
+        if (!$scanResult["clean"]) {
+            http_response_code(422);
+            echo json_encode([
+                "error"      => "File rejected: virus or malware detected.",
+                "malicious"  => $scanResult["malicious"],
+                "suspicious" => $scanResult["suspicious"],
+            ]);
+            exit;
+        }
+
+        // Upload to Cloudinary only if clean
+        require_once "cloudinary.php";
+        $publicId = "rx_" . $userId . "_" . time();
+        $url      = uploadToCloudinary($file["tmp_name"], "jdnhealth/prescriptions", $publicId);
+        $filename = basename($url);
+
+        echo json_encode([
+            "success"   => true,
+            "url"       => $url,
+            "filename"  => $filename,
+            "scan"      => [
+                "clean"   => $scanResult["clean"],
+                "engines" => $scanResult["total"],
+                "status"  => $scanResult["status"],
+                "warning" => $scanResult["warning"] ?? null,
+            ],
+        ]);
+    } catch (Exception $e) {
         http_response_code(500);
-        echo json_encode(["error" => "Failed to save file."]);
+        echo json_encode(["error" => "Upload failed: " . $e->getMessage()]);
     }
     exit;
 }
@@ -58,6 +82,9 @@ elseif ($method === "POST") {
     $stmt = $pdo->prepare("INSERT INTO orders (user_id, total, status, prescription_url) VALUES (?, ?, 'processing', ?)");
     $stmt->execute([$userId, $total, $prescription_url]);
     $orderId = $pdo->lastInsertId();
+    // Send push notification
+    require_once "push.php";
+    notifyOrderPlaced($pdo, $userId, number_format($total, 2));
     $itemStmt = $pdo->prepare("INSERT INTO order_items (order_id, product_id, product_name, quantity, price) VALUES (?, ?, ?, ?, ?)");
     foreach ($items as $item) {
         $itemStmt->execute([$orderId, $item["id"], $item["name"], $item["quantity"], $item["price"]]);

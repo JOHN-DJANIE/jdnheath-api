@@ -3,7 +3,7 @@ require_once __DIR__ . "/vendor/autoload.php";
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
-define("JWT_SECRET", "jdnhealth_gh_super_secret_key_for_jwt_authentication_2026_secure");
+define("JWT_SECRET", getenv("JWT_SECRET") ?: "jdnhealth_gh_super_secret_key_for_jwt_authentication_2026_secure");
 
 function generateToken($user) {
     $payload = [
@@ -33,3 +33,4 @@ function verifyToken() {
         exit;
     }
 }
+

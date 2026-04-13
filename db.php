@@ -5,7 +5,7 @@ $db   = getenv("DB_NAME") ?: "neondb";
 $user = getenv("DB_USER") ?: "neondb_owner";
 $pass = getenv("DB_PASS") ?: "npg_wYIl1tr8KTWg";
 
-$connStr = "host=$host port=$port dbname=$db user=$user password=$pass sslmode=require options='endpoint=ep-proud-thunder-a471usl4'";
+$connStr = "host=$host port=$port dbname=$db user=$user password=$pass sslmode=require";
 $pgConn  = pg_connect($connStr);
 
 if (!$pgConn) {

@@ -20,5 +20,7 @@ foreach ($doctors as $id => $email) {
     $stmt->execute([$email, $password, $id]);
 }
 
-$result = $pdo->query("SELECT id, name, email FROM doctors ORDER BY id")->fetchAll();
+$stmt2 = $pdo->prepare("SELECT id, name, email FROM doctors ORDER BY id");
+$stmt2->execute([]);
+$result = $stmt2->fetchAll();
 echo json_encode(["message" => "Doctor logins seeded!", "doctors" => $result]);

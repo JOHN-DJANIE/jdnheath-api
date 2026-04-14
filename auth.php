@@ -53,7 +53,7 @@ if ($method === "POST" && $action === "register") {
     $verifyCode = generateCode();
     $verifyExpires = time() + (24 * 60 * 60);
 
-    $stmt = $pdo->prepare("INSERT INTO users (name, email, password, phone, gender, role, nhia_number, date_of_birth, verification_code, verification_expires, is_verified) VALUES (?,?,?,?,?,?,?,?,?,?,0)");
+    $stmt = $pdo->prepare("INSERT INTO users (name, email, password, phone, gender, role, nhia_number, date_of_birth, verification_code, verification_expires, is_verified) VALUES (?,?,?,?,?,?,?,?,?,?,FALSE)");
     $stmt->execute([$name, $email, $hashed, $phone ?: null, $gender, $role, $nhia ?: null, $dob, $verifyCode, $verifyExpires]);
     $id = $pdo->lastInsertId();
 

@@ -4,8 +4,8 @@ ini_set("display_errors", 0);
 require_once "cors.php";
 require_once "db.php";
 require_once "auth_helper.php";
-require_once "cloudinary.php";
-require_once "push.php";
+try { require_once "cloudinary.php"; } catch (Exception $e) {}
+try { require_once "push.php"; } catch (Exception $e) {}
 
 $method = $_SERVER["REQUEST_METHOD"];
 $action = $_GET["action"] ?? "";

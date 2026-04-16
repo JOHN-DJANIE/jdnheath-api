@@ -39,7 +39,7 @@ elseif ($method === "GET" && $action === "stats") {
     $users = $pdo->query("SELECT COUNT(*) as count FROM users")->fetch()["count"];
     $doctors = $pdo->query("SELECT COUNT(*) as count FROM doctors WHERE is_active = 1")->fetch()["count"];
     $hospitals = $pdo->query("SELECT COUNT(*) as count FROM hospitals WHERE is_active = 1")->fetch()["count"];
-    $consultations = $pdo->query("SELECT COUNT(*) as count FROM consultations")->fetch()["count"];
+    $consultations = $pdo->query("SELECT (SELECT COUNT(*) FROM consultations) + (SELECT COUNT(*) FROM appointments) as count")->fetch()["count"];
     $orders = $pdo->query("SELECT COUNT(*) as count FROM orders")->fetch()["count"];
     $revenue = $pdo->query("SELECT SUM(total) as total FROM orders")->fetch()["total"] ?? 0;
     $cr = $pdo->prepare("SELECT SUM(total_price) as total FROM consultations WHERE status = ?"); $cr->execute(["completed"]); $consult_revenue = $cr->fetch()["total"] ?? 0;
@@ -119,7 +119,7 @@ elseif ($method === "PUT" && $action === "order") {
 }
 elseif ($method === "GET" && $action === "consultations") {
     verifyAdmin($pdo);
-    $stmt = $pdo->query("SELECT c.*, u.name as patient_name, d.name as doctor_name FROM consultations c JOIN users u ON c.user_id = u.id LEFT JOIN doctors d ON c.doctor_id = d.id ORDER BY c.created_at DESC");
+    $stmt = $pdo->query("SELECT c.id, c.user_id, c.doctor_id, c.consultation_type, c.appointment_date, c.appointment_time, c.status, c.total_price, c.created_at, u.name as patient_name, d.name as doctor_name FROM consultations c JOIN users u ON c.user_id = u.id LEFT JOIN doctors d ON c.doctor_id = d.id UNION ALL SELECT a.id, a.user_id, NULL, a.type, a.appointment_date, a.appointment_time, a.status, 0, a.created_at, u.name as patient_name, a.doctor_name FROM appointments a JOIN users u ON a.user_id = u.id ORDER BY created_at DESC");
     echo json_encode(["consultations" => $stmt->fetchAll()]);
 }
 elseif ($method === "GET" && $action === "analytics") {

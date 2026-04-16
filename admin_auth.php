@@ -42,7 +42,7 @@ elseif ($method === "GET" && $action === "stats") {
     $consultations = $pdo->query("SELECT (SELECT COUNT(*) FROM consultations) + (SELECT COUNT(*) FROM appointments) as count")->fetch()["count"];
     $orders = $pdo->query("SELECT COUNT(*) as count FROM orders")->fetch()["count"];
     $revenue = $pdo->query("SELECT SUM(total) as total FROM orders")->fetch()["total"] ?? 0;
-    $cr = $pdo->prepare("SELECT SUM(total_price) as total FROM consultations WHERE status = ?"); $cr->execute(["completed"]); $consult_revenue = $cr->fetch()["total"] ?? 0;
+    $cr = $pdo->prepare("SELECT SUM(total_price) as total FROM consultations WHERE status = ? AND patient_id IS NOT NULL"); $cr->execute(["completed"]); $consult_revenue = $cr->fetch()["total"] ?? 0;
     $new_users_today = $pdo->query("SELECT COUNT(*) as count FROM users WHERE created_at::date = CURRENT_DATE")->fetch()["count"];
     $pc = $pdo->prepare("SELECT COUNT(*) as count FROM consultations WHERE status = ?"); $pc->execute(["pending"]); $pending_consults = $pc->fetch()["count"];
     echo json_encode(["users" => $users, "doctors" => $doctors, "hospitals" => $hospitals, "consultations" => $consultations, "orders" => $orders, "pharmacy_revenue" => $revenue, "consult_revenue" => $consult_revenue, "new_users_today" => $new_users_today, "pending_consults" => $pending_consults, "total_revenue" => $revenue + $consult_revenue]);
@@ -119,7 +119,7 @@ elseif ($method === "PUT" && $action === "order") {
 }
 elseif ($method === "GET" && $action === "consultations") {
     verifyAdmin($pdo);
-    $stmt = $pdo->query("SELECT c.id, c.user_id, c.doctor_id, c.consultation_type, c.appointment_date, c.appointment_time, c.status, c.total_price, c.created_at, u.name as patient_name, d.name as doctor_name FROM consultations c JOIN users u ON c.user_id = u.id LEFT JOIN doctors d ON c.doctor_id = d.id UNION ALL SELECT a.id, a.user_id, NULL, a.type, a.appointment_date, a.appointment_time, a.status, 0, a.created_at, u.name as patient_name, a.doctor_name FROM appointments a JOIN users u ON a.user_id = u.id ORDER BY created_at DESC");
+    $stmt = $pdo->query("SELECT c.id, c.patient_id, c.doctor_id, c.consultation_type, c.appointment_date, c.appointment_time, c.status, c.total_price, c.created_at, u.name as patient_name, d.name as doctor_name FROM consultations c JOIN users u ON c.patient_id = u.id LEFT JOIN doctors d ON c.doctor_id = d.id UNION ALL SELECT a.id, a.patient_id, NULL, 'appointment', a.appointment_date, a.appointment_time, a.status, 0, a.created_at, u.name as patient_name, a.doctor_name FROM appointments a JOIN users u ON a.patient_id = u.id ORDER BY created_at DESC");
     echo json_encode(["consultations" => $stmt->fetchAll()]);
 }
 elseif ($method === "GET" && $action === "analytics") {

@@ -37,8 +37,8 @@ error_log("METHOD: $method ACTION: $action"); if ($method === "POST" && $action 
 elseif ($method === "GET" && $action === "stats") {
     verifyAdmin($pdo);
     $uq = $pdo->prepare("SELECT COUNT(*) as count FROM users"); $uq->execute(); $users = $uq->fetch()["count"];
-    $dq = $pdo->prepare("SELECT COUNT(*) as count FROM doctors WHERE is_active = 1"); $dq->execute(); $doctors = $dq->fetch()["count"];
-    $hq = $pdo->prepare("SELECT COUNT(*) as count FROM hospitals WHERE is_active = 1"); $hq->execute(); $hospitals = $hq->fetch()["count"];
+    $dq = $pdo->prepare("SELECT COUNT(*) as count FROM doctors WHERE is_active = true"); $dq->execute(); $doctors = $dq->fetch()["count"];
+    $hq = $pdo->prepare("SELECT COUNT(*) as count FROM hospitals WHERE is_active = true"); $hq->execute(); $hospitals = $hq->fetch()["count"];
     $cq = $pdo->prepare("SELECT (SELECT COUNT(*) FROM consultations) + (SELECT COUNT(*) FROM appointments) as count"); $cq->execute(); $consultations = $cq->fetch()["count"];
     $oq = $pdo->prepare("SELECT COUNT(*) as count FROM orders"); $oq->execute(); $orders = $oq->fetch()["count"];
     $rq = $pdo->prepare("SELECT SUM(total) as total FROM orders"); $rq->execute(); $revenue = $rq->fetch()["total"] ?? 0;
@@ -150,7 +150,7 @@ elseif ($method === "POST" && $action === "broadcast") {
     $target = $data["target"] ?? "all";
     if (!$message) { http_response_code(400); echo json_encode(["error" => "Message required."]); exit; }
     $sql = "SELECT phone, name FROM users WHERE phone IS NOT NULL AND phone != ''";
-    if ($target === "verified") $sql .= " AND is_verified = 1";
+    if ($target === "verified") $sql .= " AND is_verified = true";
     $uStmt = $pdo->prepare($sql); $uStmt->execute($params); $users = $uStmt->fetchAll();
     $sent = 0;
     foreach ($users as $user) { if (sendSMS($user["phone"], $message)) $sent++; }

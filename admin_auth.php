@@ -43,7 +43,7 @@ elseif ($method === "GET" && $action === "stats") {
     $orders = $pdo->query("SELECT COUNT(*) as count FROM orders")->fetch()["count"];
     $revenue = $pdo->query("SELECT SUM(total) as total FROM orders")->fetch()["total"] ?? 0;
     $cr = $pdo->prepare("SELECT SUM(total_price) as total FROM consultations WHERE status = ?"); $cr->execute(["completed"]); $consult_revenue = $cr->fetch()["total"] ?? 0;
-    $new_users_today = $pdo->query("SELECT COUNT(*) as count FROM users WHERE date(created_at) = date('now')")->fetch()["count"];
+    $new_users_today = $pdo->query("SELECT COUNT(*) as count FROM users WHERE created_at::date = CURRENT_DATE")->fetch()["count"];
     $pc = $pdo->prepare("SELECT COUNT(*) as count FROM consultations WHERE status = ?"); $pc->execute(["pending"]); $pending_consults = $pc->fetch()["count"];
     echo json_encode(["users" => $users, "doctors" => $doctors, "hospitals" => $hospitals, "consultations" => $consultations, "orders" => $orders, "pharmacy_revenue" => $revenue, "consult_revenue" => $consult_revenue, "new_users_today" => $new_users_today, "pending_consults" => $pending_consults, "total_revenue" => $revenue + $consult_revenue]);
 }

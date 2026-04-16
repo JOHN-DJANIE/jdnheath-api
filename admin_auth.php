@@ -36,14 +36,14 @@ error_log("METHOD: $method ACTION: $action"); if ($method === "POST" && $action 
 }
 elseif ($method === "GET" && $action === "stats") {
     verifyAdmin($pdo);
-    $users = $pdo->query("SELECT COUNT(*) as count FROM users")->fetch()["count"];
-    $doctors = $pdo->query("SELECT COUNT(*) as count FROM doctors WHERE is_active = 1")->fetch()["count"];
-    $hospitals = $pdo->query("SELECT COUNT(*) as count FROM hospitals WHERE is_active = 1")->fetch()["count"];
-    $consultations = $pdo->query("SELECT COUNT(*) as count FROM consultations")->fetch()["count"];
-    $orders = $pdo->query("SELECT COUNT(*) as count FROM orders")->fetch()["count"];
-    $revenue = $pdo->query("SELECT SUM(total) as total FROM orders")->fetch()["total"] ?? 0;
+    $uq = $pdo->prepare("SELECT COUNT(*) as count FROM users"); $uq->execute(); $users = $uq->fetch()["count"];
+    $dq = $pdo->prepare("SELECT COUNT(*) as count FROM doctors WHERE is_active = 1"); $dq->execute(); $doctors = $dq->fetch()["count"];
+    $hq = $pdo->prepare("SELECT COUNT(*) as count FROM hospitals WHERE is_active = 1"); $hq->execute(); $hospitals = $hq->fetch()["count"];
+    $cq = $pdo->prepare("SELECT COUNT(*) as count FROM consultations"); $cq->execute(); $consultations = $cq->fetch()["count"];
+    $oq = $pdo->prepare("SELECT COUNT(*) as count FROM orders"); $oq->execute(); $orders = $oq->fetch()["count"];
+    $rq = $pdo->prepare("SELECT SUM(total) as total FROM orders"); $rq->execute(); $revenue = $rq->fetch()["total"] ?? 0;
     $cr = $pdo->prepare("SELECT SUM(total_price) as total FROM consultations WHERE status = ? AND patient_id IS NOT NULL"); $cr->execute(["completed"]); $consult_revenue = $cr->fetch()["total"] ?? 0;
-    $new_users_today = $pdo->query("SELECT COUNT(*) as count FROM users WHERE created_at::date = CURRENT_DATE")->fetch()["count"];
+    $nq = $pdo->prepare("SELECT COUNT(*) as count FROM users WHERE created_at::date = CURRENT_DATE"); $nq->execute(); $new_users_today = $nq->fetch()["count"];
     $pc = $pdo->prepare("SELECT COUNT(*) as count FROM consultations WHERE status = ?"); $pc->execute(["pending"]); $pending_consults = $pc->fetch()["count"];
     echo json_encode(["users" => $users, "doctors" => $doctors, "hospitals" => $hospitals, "consultations" => $consultations, "orders" => $orders, "pharmacy_revenue" => $revenue, "consult_revenue" => $consult_revenue, "new_users_today" => $new_users_today, "pending_consults" => $pending_consults, "total_revenue" => $revenue + $consult_revenue]);
 }
@@ -124,8 +124,8 @@ elseif ($method === "GET" && $action === "consultations") {
 }
 elseif ($method === "GET" && $action === "analytics") {
     verifyAdmin($pdo);
-    $top_doctors = $pdo->query("SELECT name, specialty, total_consultations, total_earnings FROM doctors ORDER BY total_consultations DESC LIMIT 5")->fetchAll();
-    $top_products = $pdo->query("SELECT name, 0 as orders FROM products ORDER BY name LIMIT 5")->fetchAll();
+    $td = $pdo->prepare("SELECT name, specialty, total_consultations, total_earnings FROM doctors ORDER BY total_consultations DESC LIMIT 5"); $td->execute(); $top_doctors = $td->fetchAll();
+    $tp = $pdo->prepare("SELECT name, 0 as orders FROM products ORDER BY name LIMIT 5"); $tp->execute(); $top_products = $tp->fetchAll();
     echo json_encode(["top_doctors" => $top_doctors, "top_products" => $top_products]);
 }
 elseif ($method === "GET" && $action === "settings") {

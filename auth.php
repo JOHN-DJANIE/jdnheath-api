@@ -22,7 +22,7 @@ function generateCode() {
 }
 
 if ($method === "POST" && $action === "register") {
-    checkRateLimit($pdo, "register", $RATE_LIMITS);
+    try { checkRateLimit($pdo, "register", $RATE_LIMITS); } catch (Exception $e) { }
     $data = json_decode(file_get_contents("php://input"), true);
     $name  = trim($data["name"] ?? "");
     $email = trim($data["email"] ?? "");
@@ -65,7 +65,7 @@ if ($method === "POST" && $action === "register") {
 }
 
 elseif ($method === "POST" && $action === "login") {
-    checkRateLimit($pdo, "login", $RATE_LIMITS);
+    try { checkRateLimit($pdo, "login", $RATE_LIMITS); } catch (Exception $e) { }
     $data = json_decode(file_get_contents("php://input"), true);
     $email    = trim($data["email"] ?? "");
     $password = $data["password"] ?? "";

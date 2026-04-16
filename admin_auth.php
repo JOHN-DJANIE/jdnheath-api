@@ -39,7 +39,7 @@ elseif ($method === "GET" && $action === "stats") {
     $uq = $pdo->prepare("SELECT COUNT(*) as count FROM users"); $uq->execute(); $users = $uq->fetch()["count"];
     $dq = $pdo->prepare("SELECT COUNT(*) as count FROM doctors WHERE is_active = 1"); $dq->execute(); $doctors = $dq->fetch()["count"];
     $hq = $pdo->prepare("SELECT COUNT(*) as count FROM hospitals WHERE is_active = 1"); $hq->execute(); $hospitals = $hq->fetch()["count"];
-    $cq = $pdo->prepare("SELECT COUNT(*) as count FROM consultations"); $cq->execute(); $consultations = $cq->fetch()["count"];
+    $cq = $pdo->prepare("SELECT (SELECT COUNT(*) FROM consultations) + (SELECT COUNT(*) FROM appointments) as count"); $cq->execute(); $consultations = $cq->fetch()["count"];
     $oq = $pdo->prepare("SELECT COUNT(*) as count FROM orders"); $oq->execute(); $orders = $oq->fetch()["count"];
     $rq = $pdo->prepare("SELECT SUM(total) as total FROM orders"); $rq->execute(); $revenue = $rq->fetch()["total"] ?? 0;
     $cr = $pdo->prepare("SELECT SUM(total_price) as total FROM consultations WHERE status = ? AND patient_id IS NOT NULL"); $cr->execute(["completed"]); $consult_revenue = $cr->fetch()["total"] ?? 0;

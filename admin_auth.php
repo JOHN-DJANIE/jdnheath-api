@@ -72,7 +72,7 @@ elseif ($method === "PUT" && $action === "doctor") {
     verifyAdmin($pdo);
     $id = $_GET["id"] ?? null;
     $data = json_decode(file_get_contents("php://input"), true);
-    $pdo->prepare("UPDATE doctors SET is_verified = ?, is_active = ? WHERE id = ?")->execute([$data["is_verified"] ?? 1, $data["is_active"] ?? 1, $id]);
+    $pdo->prepare("UPDATE doctors SET is_verified = ?, is_active = ? WHERE id = ?")->execute([$data["is_verified"] ?? true, $data["is_active"] ?? true, $id]);
     echo json_encode(["message" => "Doctor updated."]);
 }
 elseif ($method === "GET" && $action === "hospitals") {

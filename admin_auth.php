@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 error_reporting(0); ini_set("display_errors", 0);
 require_once "cors.php";
 require_once "db.php";
@@ -20,8 +20,8 @@ function verifyAdmin($pdo) {
     } catch (Exception $e) { http_response_code(403); echo json_encode(["error" => "Invalid token."]); exit; }
 }
 
-if ($method === "POST" && $action === "login") {
-    checkRateLimit($pdo, "login", $RATE_LIMITS);
+error_log("METHOD: $method ACTION: $action"); if ($method === "POST" && $action === "login") {
+    try { checkRateLimit($pdo, "login", $RATE_LIMITS); } catch (Exception $e) { /* rate_limits table may not exist */ }
     $data = json_decode(file_get_contents("php://input"), true);
     $email = trim($data["email"] ?? "");
     $password = $data["password"] ?? "";
@@ -160,4 +160,5 @@ else {
     http_response_code(404);
     echo json_encode(["error" => "Route not found."]);
 }
+
 

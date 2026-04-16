@@ -65,7 +65,7 @@ elseif ($method === "DELETE" && $action === "user") {
 }
 elseif ($method === "GET" && $action === "doctors") {
     verifyAdmin($pdo);
-    $stmt = $pdo->query("SELECT id, name, email, specialty, hospital, rating, consultation_fee, is_verified, is_active, total_consultations, total_earnings FROM doctors ORDER BY name");
+    $stmt = $pdo->prepare("SELECT id, name, email, specialty, hospital, rating, consultation_fee, is_verified, is_active, total_consultations, total_earnings FROM doctors ORDER BY name"); $stmt->execute();
     echo json_encode(["doctors" => $stmt->fetchAll()]);
 }
 elseif ($method === "PUT" && $action === "doctor") {
@@ -77,12 +77,12 @@ elseif ($method === "PUT" && $action === "doctor") {
 }
 elseif ($method === "GET" && $action === "hospitals") {
     verifyAdmin($pdo);
-    $stmt = $pdo->query("SELECT * FROM hospitals ORDER BY name");
+    $stmt = $pdo->prepare("SELECT * FROM hospitals ORDER BY name"); $stmt->execute();
     echo json_encode(["hospitals" => $stmt->fetchAll()]);
 }
 elseif ($method === "GET" && $action === "products") {
     verifyAdmin($pdo);
-    $stmt = $pdo->query("SELECT * FROM products ORDER BY name");
+    $stmt = $pdo->prepare("SELECT * FROM products ORDER BY name"); $stmt->execute();
     echo json_encode(["products" => $stmt->fetchAll()]);
 }
 elseif ($method === "POST" && $action === "product") {
@@ -107,7 +107,7 @@ elseif ($method === "DELETE" && $action === "product") {
 }
 elseif ($method === "GET" && $action === "orders") {
     verifyAdmin($pdo);
-    $stmt = $pdo->query("SELECT o.*, u.name as patient_name, u.email as patient_email FROM orders o JOIN users u ON o.user_id = u.id ORDER BY o.created_at DESC");
+    $stmt = $pdo->prepare("SELECT o.*, u.name as patient_name, u.email as patient_email FROM orders o JOIN users u ON o.user_id = u.id ORDER BY o.created_at DESC"); $stmt->execute();
     echo json_encode(["orders" => $stmt->fetchAll()]);
 }
 elseif ($method === "PUT" && $action === "order") {
@@ -119,7 +119,7 @@ elseif ($method === "PUT" && $action === "order") {
 }
 elseif ($method === "GET" && $action === "consultations") {
     verifyAdmin($pdo);
-    $stmt = $pdo->query("SELECT a.id, a.patient_id, NULL as doctor_id, 'appointment' as consultation_type, a.appointment_date, a.appointment_time, a.status, 0 as total_price, a.created_at, u.name as patient_name, a.doctor_name FROM appointments a LEFT JOIN users u ON a.patient_id = u.id ORDER BY a.created_at DESC");
+    $stmt = $pdo->prepare("SELECT a.id, a.patient_id, NULL as doctor_id, 'appointment' as consultation_type, a.appointment_date, a.appointment_time, a.status, 0 as total_price, a.created_at, u.name as patient_name, a.doctor_name FROM appointments a LEFT JOIN users u ON a.patient_id = u.id ORDER BY a.created_at DESC"); $stmt->execute();
     echo json_encode(["consultations" => $stmt->fetchAll()]);
 }
 elseif ($method === "GET" && $action === "analytics") {
@@ -130,7 +130,7 @@ elseif ($method === "GET" && $action === "analytics") {
 }
 elseif ($method === "GET" && $action === "settings") {
     verifyAdmin($pdo);
-    $stmt = $pdo->query("SELECT key, value FROM platform_settings");
+    $stmt = $pdo->prepare("SELECT key, value FROM platform_settings"); $stmt->execute();
     $settings = [];
     foreach ($stmt->fetchAll() as $row) { $settings[$row["key"]] = $row["value"]; }
     echo json_encode(["settings" => $settings]);
@@ -151,7 +151,7 @@ elseif ($method === "POST" && $action === "broadcast") {
     if (!$message) { http_response_code(400); echo json_encode(["error" => "Message required."]); exit; }
     $sql = "SELECT phone, name FROM users WHERE phone IS NOT NULL AND phone != ''";
     if ($target === "verified") $sql .= " AND is_verified = 1";
-    $users = $pdo->query($sql)->fetchAll();
+    $uStmt = $pdo->prepare($sql); $uStmt->execute($params); $users = $uStmt->fetchAll();
     $sent = 0;
     foreach ($users as $user) { if (sendSMS($user["phone"], $message)) $sent++; }
     echo json_encode(["message" => "Broadcast sent.", "sent" => $sent, "total" => count($users)]);

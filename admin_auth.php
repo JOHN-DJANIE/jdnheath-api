@@ -39,7 +39,7 @@ elseif ($method === "GET" && $action === "stats") {
     $users = $pdo->query("SELECT COUNT(*) as count FROM users")->fetch()["count"];
     $doctors = $pdo->query("SELECT COUNT(*) as count FROM doctors WHERE is_active = 1")->fetch()["count"];
     $hospitals = $pdo->query("SELECT COUNT(*) as count FROM hospitals WHERE is_active = 1")->fetch()["count"];
-    $consultations = $pdo->query("SELECT (SELECT COUNT(*) FROM consultations) + (SELECT COUNT(*) FROM appointments) as count")->fetch()["count"];
+    $consultations = $pdo->query("SELECT COUNT(*) as count FROM consultations")->fetch()["count"];
     $orders = $pdo->query("SELECT COUNT(*) as count FROM orders")->fetch()["count"];
     $revenue = $pdo->query("SELECT SUM(total) as total FROM orders")->fetch()["total"] ?? 0;
     $cr = $pdo->prepare("SELECT SUM(total_price) as total FROM consultations WHERE status = ? AND patient_id IS NOT NULL"); $cr->execute(["completed"]); $consult_revenue = $cr->fetch()["total"] ?? 0;
@@ -125,7 +125,7 @@ elseif ($method === "GET" && $action === "consultations") {
 elseif ($method === "GET" && $action === "analytics") {
     verifyAdmin($pdo);
     $top_doctors = $pdo->query("SELECT name, specialty, total_consultations, total_earnings FROM doctors ORDER BY total_consultations DESC LIMIT 5")->fetchAll();
-    $top_products = $pdo->query("SELECT p.name, COUNT(oi.id) as orders FROM order_items oi JOIN products p ON oi.product_id = p.id GROUP BY p.id ORDER BY orders DESC LIMIT 5")->fetchAll();
+    $top_products = $pdo->query("SELECT name, 0 as orders FROM products ORDER BY name LIMIT 5")->fetchAll();
     echo json_encode(["top_doctors" => $top_doctors, "top_products" => $top_products]);
 }
 elseif ($method === "GET" && $action === "settings") {

@@ -119,7 +119,7 @@ elseif ($method === "PUT" && $action === "order") {
 }
 elseif ($method === "GET" && $action === "consultations") {
     verifyAdmin($pdo);
-    $stmt = $pdo->query("SELECT c.id, c.patient_id, c.doctor_id, c.consultation_type, c.appointment_date, c.appointment_time, c.status, c.total_price, c.created_at, u.name as patient_name, d.name as doctor_name FROM consultations c JOIN users u ON c.patient_id = u.id LEFT JOIN doctors d ON c.doctor_id = d.id UNION ALL SELECT a.id, a.patient_id, NULL, 'appointment', a.appointment_date, a.appointment_time, a.status, 0, a.created_at, u.name as patient_name, a.doctor_name FROM appointments a JOIN users u ON a.patient_id = u.id ORDER BY created_at DESC");
+    $stmt = $pdo->query("SELECT a.id, a.patient_id, NULL as doctor_id, 'appointment' as consultation_type, a.appointment_date, a.appointment_time, a.status, 0 as total_price, a.created_at, u.name as patient_name, a.doctor_name FROM appointments a LEFT JOIN users u ON a.patient_id = u.id ORDER BY a.created_at DESC");
     echo json_encode(["consultations" => $stmt->fetchAll()]);
 }
 elseif ($method === "GET" && $action === "analytics") {

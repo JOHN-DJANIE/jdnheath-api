@@ -20,7 +20,7 @@ function verifyAdmin($pdo) {
     } catch (Exception $e) { http_response_code(403); echo json_encode(["error" => "Invalid token."]); exit; }
 }
 
-error_log("METHOD: $method ACTION: $action"); if ($method === "POST" && $action === "login") {
+if ($method === "POST" && $action === "login") {
     try { checkRateLimit($pdo, "login", $RATE_LIMITS); } catch (Exception $e) { /* rate_limits table may not exist */ }
     $data = json_decode(file_get_contents("php://input"), true);
     $email = trim($data["email"] ?? "");

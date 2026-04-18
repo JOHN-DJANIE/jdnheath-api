@@ -5,8 +5,8 @@ require_once "db.php";
 require_once "auth_helper.php";
 require_once "ratelimit.php";
 
-$method = $_SERVER["REQUEST_METHOD"];
 require_once "admin_extra.php";
+$method = $_SERVER["REQUEST_METHOD"];
 $action = $_GET["action"] ?? "";
 
 function verifyAdmin($pdo) {
@@ -161,5 +161,4 @@ else {
     http_response_code(404);
     echo json_encode(["error" => "Route not found."]);
 }
-
 

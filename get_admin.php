@@ -1,0 +1,2 @@
+<?php
+echo file_get_contents(__DIR__ . "/admin_auth.php");

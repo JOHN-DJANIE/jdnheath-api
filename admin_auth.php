@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
@@ -148,7 +148,16 @@ elseif ($method === "PUT" && $action === "settings") {
     foreach ($data as $key => $value) { $stmt->execute([$key, $value]); }
     echo json_encode(["message" => "Settings updated."]);
 }
-elseif ($method === "POST" && $action === "broadcast") {
+elseif ($method === "POST" && $action === "add_doctor") {
+      verifyAdmin($pdo);
+      $data = json_decode(file_get_contents("php://input"), true);
+      if (empty($data["name"]) || empty($data["email"])) { http_response_code(400); echo json_encode(["error" => "Name and email required"]); exit; }
+      $hash = password_hash($data["password"] ?? "Doctor1234", PASSWORD_BCRYPT);
+      $stmt = $pdo->prepare("INSERT INTO doctors (name, email, password, specialty, hospital, location, phone, consultation_fee, years_experience, bio, is_verified, is_active) VALUES (?,?,?,?,?,?,?,?,?,?,TRUE,TRUE)");
+      $stmt->execute([$data["name"], $data["email"], $hash, $data["specialty"] ?? "", $data["hospital"] ?? "", $data["location"] ?? "", $data["phone"] ?? null, $data["consultation_fee"] ?? 0, $data["years_experience"] ?? 0, $data["bio"] ?? ""]);
+      echo json_encode(["message" => "Doctor added.", "id" => $pdo->lastInsertId()]);
+  }
+  elseif ($method === "POST" && $action === "broadcast") {
     verifyAdmin($pdo);
     require_once "sms.php";
     $data = json_decode(file_get_contents("php://input"), true);

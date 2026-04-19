@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 if (!isset($method) || !isset($action)) return;
 
 if ($method === "GET" && $action === "claims") {

@@ -74,8 +74,21 @@ elseif ($method === "PUT" && $action === "doctor") {
     verifyAdmin($pdo);
     $id = $_GET["id"] ?? null;
     $data = json_decode(file_get_contents("php://input"), true);
-    $pdo->prepare("UPDATE doctors SET is_verified = ?, is_active = ? WHERE id = ?")->execute([$data["is_verified"] ?? true, $data["is_active"] ?? true, $id]);
-    echo json_encode(["message" => "Doctor updated."]);
+    $fields=[]; $params=[];
+    if(array_key_exists("is_verified",$data)){$fields[]="is_verified=?";$params[]=$data["is_verified"];}
+    if(array_key_exists("is_active",$data)){$fields[]="is_active=?";$params[]=$data["is_active"];}
+    if(array_key_exists("consultation_fee",$data)){$fields[]="consultation_fee=?";$params[]=$data["consultation_fee"];}
+    if(array_key_exists("name",$data)){$fields[]="name=?";$params[]=$data["name"];}
+    if(array_key_exists("specialty",$data)){$fields[]="specialty=?";$params[]=$data["specialty"];}
+    if(array_key_exists("hospital",$data)){$fields[]="hospital=?";$params[]=$data["hospital"];}
+    if(array_key_exists("location",$data)){$fields[]="location=?";$params[]=$data["location"];}
+    if(array_key_exists("phone",$data)){$fields[]="phone=?";$params[]=$data["phone"];}
+    if(array_key_exists("years_experience",$data)){$fields[]="years_experience=?";$params[]=$data["years_experience"];}
+    if(array_key_exists("bio",$data)){$fields[]="bio=?";$params[]=$data["bio"];}
+    if(empty($fields)){echo json_encode(["error"=>"No fields"]);exit;}
+    $params[]=$id;
+    $pdo->prepare("UPDATE doctors SET ".implode(",",$fields)." WHERE id=?")->execute($params);
+    echo json_encode(["message"=>"Doctor updated."]);
 }
 elseif ($method === "GET" && $action === "hospitals") {
     verifyAdmin($pdo);
@@ -90,8 +103,8 @@ elseif ($method === "GET" && $action === "products") {
 elseif ($method === "POST" && $action === "product") {
     verifyAdmin($pdo);
     $data = json_decode(file_get_contents("php://input"), true);
-    $stmt = $pdo->prepare("INSERT INTO products (name, category, price, unit, rx, stock, description, manufacturer) VALUES (?,?,?,?,?,?,?,?)");
-    $stmt->execute([$data["name"], $data["category"], $data["price"], $data["unit"] ?? null, $data["rx"] ?? 0, $data["stock"] ?? "in", $data["description"] ?? null, $data["manufacturer"] ?? null]);
+    $stmt = $pdo->prepare("INSERT INTO products (name, category, price, unit, rx_required, stock, stock_quantity, description, manufacturer, is_active) VALUES (?,?,?,?,?,?,?,?,?,TRUE)");
+    $sqty = isset($data["stock_quantity"]) ? intval($data["stock_quantity"]) : ($data["stock"]==="out"?0:($data["stock"]==="low"?5:100)); $stmt->execute([$data["name"], $data["category"], $data["price"], $data["unit"]??null, $data["rx"]??0, $data["stock"]??"in", $sqty, $data["description"]??null, $data["manufacturer"]??null]);
     echo json_encode(["message" => "Product added.", "id" => $pdo->lastInsertId()]);
 }
 elseif ($method === "PUT" && $action === "product") {
@@ -99,7 +112,7 @@ elseif ($method === "PUT" && $action === "product") {
     $id = $_GET["id"] ?? null;
     $data = json_decode(file_get_contents("php://input"), true);
     $stockQty = isset($data["stock_quantity"]) ? intval($data["stock_quantity"]) : ($data["stock"] === "out" ? 0 : ($data["stock"] === "low" ? 5 : 100));
-      $pdo->prepare("UPDATE products SET name=?, category=?, price=?, unit=?, rx=?, stock=?, stock_quantity=?, description=?, manufacturer=?, is_active=TRUE WHERE id=?")->execute([$data["name"], $data["category"], $data["price"], $data["unit"], $data["rx"] ?? 0, $data["stock"], $stockQty, $data["description"], $data["manufacturer"], $id]);
+      $pdo->prepare("UPDATE products SET name=?, category=?, price=?, unit=?, rx_required=?, stock=?, stock_quantity=?, description=?, manufacturer=?, is_active=TRUE WHERE id=?")->execute([$data["name"], $data["category"], $data["price"], $data["unit"], $data["rx"] ?? 0, $data["stock"], $stockQty, $data["description"], $data["manufacturer"], $id]);
     echo json_encode(["message" => "Product updated."]);
 }
 elseif ($method === "DELETE" && $action === "product") {
@@ -163,7 +176,7 @@ elseif ($method === "POST" && $action === "add_doctor") {
     if (!$message) { http_response_code(400); echo json_encode(["error" => "Message required."]); exit; }
     $sql = "SELECT phone, name FROM users WHERE phone IS NOT NULL AND phone != ''";
     if ($target === "verified") $sql .= " AND is_verified = true";
-    $uStmt = $pdo->prepare($sql); $uStmt->execute($params); $users = $uStmt->fetchAll();
+    $uStmt = $pdo->prepare($sql); $uStmt->execute([]); $users = $uStmt->fetchAll();
     $sent = 0;
     foreach ($users as $user) { if (sendSMS($user["phone"], $message)) $sent++; }
     echo json_encode(["message" => "Broadcast sent.", "sent" => $sent, "total" => count($users)]);
@@ -214,4 +227,3 @@ else {
     http_response_code(404);
     echo json_encode(["error" => "Route not found."]);
 }
-

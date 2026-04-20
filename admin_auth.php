@@ -98,7 +98,8 @@ elseif ($method === "PUT" && $action === "product") {
     verifyAdmin($pdo);
     $id = $_GET["id"] ?? null;
     $data = json_decode(file_get_contents("php://input"), true);
-    $pdo->prepare("UPDATE products SET name=?, category=?, price=?, unit=?, rx=?, stock=?, description=?, manufacturer=? WHERE id=?")->execute([$data["name"], $data["category"], $data["price"], $data["unit"], $data["rx"] ?? 0, $data["stock"], $data["description"], $data["manufacturer"], $id]);
+    $stockQty = $data["stock"] === "out" ? 0 : ($data["stock"] === "low" ? 5 : 100);
+      $pdo->prepare("UPDATE products SET name=?, category=?, price=?, unit=?, rx=?, stock=?, stock_quantity=?, description=?, manufacturer=?, is_active=TRUE WHERE id=?")->execute([$data["name"], $data["category"], $data["price"], $data["unit"], $data["rx"] ?? 0, $data["stock"], $stockQty, $data["description"], $data["manufacturer"], $id]);
     echo json_encode(["message" => "Product updated."]);
 }
 elseif ($method === "DELETE" && $action === "product") {

@@ -75,7 +75,7 @@ elseif ($method === "PUT" && $action === "doctor") {
     $id = $_GET["id"] ?? null;
     $data = json_decode(file_get_contents("php://input"), true);
     $fields=[]; $params=[];
-    if(array_key_exists("is_verified",$data)){$fields[]="is_verified=?";$params[]=$data["is_verified"];}
+    if(array_key_exists("is_verified",$data)){$fields[]="is_verified=?";$params[]=$data["is_verified"]; if($data["is_verified"]){$fields[]="verification_status=?";$params[]="approved";}}
     if(array_key_exists("is_active",$data)){$fields[]="is_active=?";$params[]=$data["is_active"];}
     if(array_key_exists("consultation_fee",$data)){$fields[]="consultation_fee=?";$params[]=$data["consultation_fee"];}
     if(array_key_exists("name",$data)){$fields[]="name=?";$params[]=$data["name"];}
@@ -88,7 +88,7 @@ elseif ($method === "PUT" && $action === "doctor") {
     if(empty($fields)){echo json_encode(["error"=>"No fields"]);exit;}
     $params[]=$id;
     $pdo->prepare("UPDATE doctors SET ".implode(",",$fields)." WHERE id=?")->execute($params);
-    echo json_encode(["message"=>"Doctor updated."]);
+    ob_clean(); echo json_encode(["message"=>"Doctor updated."]);
 }
 elseif ($method === "GET" && $action === "hospitals") {
     verifyAdmin($pdo);
@@ -163,8 +163,9 @@ elseif ($method === "POST" && $action === "add_doctor") {
       $data = json_decode(file_get_contents("php://input"), true);
       if (empty($data["name"]) || empty($data["email"])) { http_response_code(400); echo json_encode(["error" => "Name and email required"]); exit; }
       $hash = password_hash($data["password"] ?? "Doctor1234", PASSWORD_BCRYPT);
-      $stmt = $pdo->prepare("INSERT INTO doctors (name, email, password, specialty, hospital, location, phone, consultation_fee, years_experience, bio, is_verified, is_active) VALUES (?,?,?,?,?,?,?,?,?,?,TRUE,TRUE)");
-      $stmt->execute([$data["name"], $data["email"], $hash, $data["specialty"] ?? "", $data["hospital"] ?? "", $data["location"] ?? "", $data["phone"] ?? null, $data["consultation_fee"] ?? 0, $data["years_experience"] ?? 0, $data["bio"] ?? ""]);
+      $vstatus = "approved";
+      $stmt = $pdo->prepare("INSERT INTO doctors (name, email, password, specialty, hospital, location, phone, consultation_fee, years_experience, bio, is_verified, is_active, verification_status) VALUES (?,?,?,?,?,?,?,?,?,?,TRUE,TRUE,?)");
+      $stmt->execute([$data["name"], $data["email"], $hash, $data["specialty"] ?? "", $data["hospital"] ?? "", $data["location"] ?? "", $data["phone"] ?? null, $data["consultation_fee"] ?? 0, $data["years_experience"] ?? 0, $data["bio"] ?? "", $vstatus]);
       echo json_encode(["message" => "Doctor added.", "id" => $pdo->lastInsertId()]);
   }
   elseif ($method === "POST" && $action === "broadcast") {

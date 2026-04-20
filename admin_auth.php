@@ -75,8 +75,8 @@ elseif ($method === "PUT" && $action === "doctor") {
     $id = $_GET["id"] ?? null;
     $data = json_decode(file_get_contents("php://input"), true);
     $fields=[]; $params=[];
-    if(array_key_exists("is_verified",$data)){$fields[]="is_verified=?";$params[]=$data["is_verified"]; if($data["is_verified"]){$fields[]="verification_status=?";$params[]="approved";}}
-    if(array_key_exists("is_active",$data)){$fields[]="is_active=?";$params[]=$data["is_active"];}
+    if(array_key_exists("is_verified",$data)){$verified=($data["is_verified"]?true:false);$fields[]="is_verified=?";$params[]=$verified; if($verified){$fields[]="verification_status=?";$params[]="approved";} else{$fields[]="verification_status=?";$params[]="rejected";}}
+    if(array_key_exists("is_active",$data)){$fields[]="is_active=?";$params[]=($data["is_active"]?true:false);}
     if(array_key_exists("consultation_fee",$data)){$fields[]="consultation_fee=?";$params[]=$data["consultation_fee"];}
     if(array_key_exists("name",$data)){$fields[]="name=?";$params[]=$data["name"];}
     if(array_key_exists("specialty",$data)){$fields[]="specialty=?";$params[]=$data["specialty"];}

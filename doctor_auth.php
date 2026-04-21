@@ -46,7 +46,7 @@ elseif ($method === "GET" && $action === "stats") {
 elseif ($method === "GET" && $action === "appointments") {
     $decoded = verifyToken();
     $status = $_GET["status"] ?? "";
-    $sql = "SELECT c.*, u.name as patient_name, u.phone as patient_phone, u.email as patient_email, u.blood_type, u.allergies, u.date_of_birth FROM consultations c JOIN users u ON c.user_id = u.id WHERE c.doctor_id = ?";
+    $sql = "SELECT c.*, u.name as patient_name, u.phone as patient_phone, u.email as patient_email, u.blood_type, u.allergies, u.date_of_birth FROM consultations c LEFT JOIN users u ON c.patient_id = u.id WHERE c.doctor_id = ?";
     $params = [$decoded["id"]];
     if ($status) { $sql .= " AND c.status = ?"; $params[] = $status; }
     $sql .= " ORDER BY c.appointment_date ASC, c.appointment_time ASC";
@@ -57,7 +57,7 @@ elseif ($method === "PUT" && $action === "appointment") {
     $decoded = verifyToken();
     $id = $_GET["id"] ?? null;
     $data = json_decode(file_get_contents("php://input"), true);
-    $pdo->prepare("UPDATE consultations SET status = ? WHERE id = ? AND doctor_id = ?")->execute([$data["status"] ?? "confirmed", $id, $decoded["id"]]);
+    $pdo->prepare("UPDATE consultations SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND doctor_id = ?")->execute([$data["status"] ?? "confirmed", $id, $decoded["id"]]);
     echo json_encode(["message" => "Updated."]);
 }
 elseif ($method === "POST" && $action === "prescription") {

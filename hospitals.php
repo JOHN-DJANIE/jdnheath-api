@@ -14,7 +14,7 @@ if ($method === "GET" && $id) {
     $region = $_GET["region"] ?? "";
     $type = $_GET["type"] ?? "";
     $search = $_GET["search"] ?? "";
-    $sql = "SELECT * FROM hospitals WHERE is_active = 1";
+    $sql = "SELECT * FROM hospitals WHERE is_active = TRUE";
     $params = [];
     if ($region) { $sql .= " AND region = ?"; $params[] = $region; }
     if ($type) { $sql .= " AND type = ?"; $params[] = $type; }

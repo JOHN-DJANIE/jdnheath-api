@@ -57,7 +57,7 @@ elseif ($method === "PUT" && $action === "appointment") {
     $decoded = verifyToken();
     $id = $_GET["id"] ?? null;
     $data = json_decode(file_get_contents("php://input"), true);
-    $pdo->prepare("UPDATE consultations SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND doctor_id = ?")->execute([$data["status"] ?? "confirmed", $id, $decoded["id"]]);
+    $pdo->prepare("UPDATE consultations SET status = ? WHERE id = ? AND doctor_id = ?")->execute([$data["status"] ?? "confirmed", $id, $decoded["id"]]);
     echo json_encode(["message" => "Updated."]);
 }
 elseif ($method === "POST" && $action === "prescription") {

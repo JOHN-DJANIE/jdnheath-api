@@ -10,7 +10,7 @@ $decoded = verifyToken();
 $userId = $decoded["id"];
 
 if ($method === "GET") {
-    $stmt = $pdo->prepare("SELECT c.*, d.name as doctor_name, d.specialty, h.name as hospital_name FROM consultations c LEFT JOIN doctors d ON c.doctor_id = d.id LEFT JOIN hospitals h ON c.hospital_id = h.id WHERE c.patient_id = ? ORDER BY c.created_at DESC");
+    $stmt = $pdo->prepare("SELECT c.*, d.name as doctor_name, d.specialty, h.name as hospital_name FROM consultations c LEFT JOIN doctors d ON c.doctor_id = d.id LEFT JOIN hospitals h ON c.hospital_id = h.id WHERE c.user_id = ? ORDER BY c.created_at DESC");
     $stmt->execute([$userId]);
     echo json_encode(["consultations" => $stmt->fetchAll()]);
 } elseif ($method === "POST") {
@@ -33,7 +33,7 @@ if ($method === "GET") {
 } elseif ($method === "PUT") {
     $id = $_GET["id"] ?? null;
     $data = json_decode(file_get_contents("php://input"), true);
-    $stmt = $pdo->prepare("UPDATE consultations SET status = ? WHERE id = ? AND patient_id = ?");
+    $stmt = $pdo->prepare("UPDATE consultations SET status = ? WHERE id = ? AND user_id = ?");
     $stmt->execute([$data["status"] ?? "cancelled", $id, $userId]);
     echo json_encode(["message" => "Updated."]);
 } else {

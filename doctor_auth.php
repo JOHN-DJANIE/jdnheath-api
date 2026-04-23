@@ -38,7 +38,7 @@ elseif ($method === "GET" && $action === "stats") {
     $decoded = verifyToken();
     $today = date("Y-m-d");
     $t = $pdo->prepare("SELECT COUNT(*) as count FROM consultations WHERE doctor_id = ? AND appointment_date = ?"); $t->execute([$decoded["id"], $today]);
-    $p = $pdo->prepare("SELECT COUNT(*) as count FROM consultations WHERE doctor_id = ? AND (status = ? OR status = ?)"); $p->execute([$decoded["id"], "pending", "scheduled"]);
+    $p = $pdo->prepare("SELECT COUNT(*) as count FROM consultations WHERE doctor_id = ? AND status IN ('pending', 'scheduled', 'confirmed')"); $p->execute([$decoded["id"]]);
     $pts = $pdo->prepare("SELECT COUNT(DISTINCT patient_id) as count FROM consultations WHERE doctor_id = ?"); $pts->execute([$decoded["id"]]);
     $earn = $pdo->prepare("SELECT SUM(total_price) as total FROM consultations WHERE doctor_id = ? AND status = ?"); $earn->execute([$decoded["id"], "completed"]);
     $tot = $pdo->prepare("SELECT COUNT(*) as count FROM consultations WHERE doctor_id = ?"); $tot->execute([$decoded["id"]]);

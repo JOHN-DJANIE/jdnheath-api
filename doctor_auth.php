@@ -41,7 +41,10 @@ elseif ($method === "GET" && $action === "stats") {
     $p = $pdo->prepare("SELECT COUNT(*) as count FROM consultations WHERE doctor_id = ? AND (status = ? OR status = ?)"); $p->execute([$decoded["id"], "pending", "scheduled"]);
     $pts = $pdo->prepare("SELECT COUNT(DISTINCT patient_id) as count FROM consultations WHERE doctor_id = ?"); $pts->execute([$decoded["id"]]);
     $earn = $pdo->prepare("SELECT SUM(total_price) as total FROM consultations WHERE doctor_id = ? AND status = ?"); $earn->execute([$decoded["id"], "completed"]);
-    echo json_encode(["today_appointments" => $t->fetch()["count"], "pending_appointments" => $p->fetch()["count"], "total_patients" => $pts->fetch()["count"], "total_earnings" => $earn->fetch()["total"] ?? 0]);
+    $tot = $pdo->prepare("SELECT COUNT(*) as count FROM consultations WHERE doctor_id = ?"); $tot->execute([$decoded["id"]]);
+    $tot = $pdo->prepare("SELECT COUNT(*) as count FROM consultations WHERE doctor_id = ?"); $tot->execute([$decoded["id"]]);
+    $tot = $pdo->prepare("SELECT COUNT(*) as count FROM consultations WHERE doctor_id = ?"); $tot->execute([$decoded["id"]]);
+    echo json_encode(["today_appointments" => $t->fetch()["count"], "pending_appointments" => $p->fetch()["count"], "total_patients" => $pts->fetch()["count"], "total_earnings" => $earn->fetch()["total"] ?? 0, "total_appointments" => $tot->fetch()["count"]]);
 }
 elseif ($method === "GET" && $action === "appointments") {
     $decoded = verifyToken();

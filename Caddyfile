@@ -1,0 +1,17 @@
+﻿{
+    admin off
+}
+
+:80 {
+    root * /app
+    php_fastcgi 127.0.0.1:9000
+    file_server
+
+    @options method OPTIONS
+    handle @options {
+        header Access-Control-Allow-Origin *
+        header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+        header Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+        respond 200
+    }
+}

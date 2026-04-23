@@ -39,7 +39,7 @@ elseif ($method === "GET" && $action === "stats") {
     $today = date("Y-m-d");
     $t = $pdo->prepare("SELECT COUNT(*) as count FROM consultations WHERE doctor_id = ? AND appointment_date = ?"); $t->execute([$decoded["id"], $today]);
     $p = $pdo->prepare("SELECT COUNT(*) as count FROM consultations WHERE doctor_id = ? AND (status = ? OR status = ?)"); $p->execute([$decoded["id"], "pending", "scheduled"]);
-    $pts = $pdo->prepare("SELECT COUNT(DISTINCT user_id) as count FROM consultations WHERE doctor_id = ?"); $pts->execute([$decoded["id"]]);
+    $pts = $pdo->prepare("SELECT COUNT(DISTINCT patient_id) as count FROM consultations WHERE doctor_id = ?"); $pts->execute([$decoded["id"]]);
     $earn = $pdo->prepare("SELECT SUM(total_price) as total FROM consultations WHERE doctor_id = ? AND status = ?"); $earn->execute([$decoded["id"], "completed"]);
     $tot = $pdo->prepare("SELECT COUNT(*) as count FROM consultations WHERE doctor_id = ?"); $tot->execute([$decoded["id"]]);
     echo json_encode(["today_appointments" => $t->fetch()["count"], "pending_appointments" => $p->fetch()["count"], "total_patients" => $pts->fetch()["count"], "total_earnings" => $earn->fetch()["total"] ?? 0, "total_appointments" => $tot->fetch()["count"]]);
@@ -47,7 +47,7 @@ elseif ($method === "GET" && $action === "stats") {
 elseif ($method === "GET" && $action === "appointments") {
     $decoded = verifyToken();
     $status = $_GET["status"] ?? "";
-    $sql = "SELECT c.*, u.name as patient_name, u.phone as patient_phone, u.email as patient_email, u.blood_type, u.allergies, u.date_of_birth FROM consultations c LEFT JOIN users u ON c.user_id = u.id WHERE c.doctor_id = ?";
+    $sql = "SELECT c.*, u.name as patient_name, u.phone as patient_phone, u.email as patient_email, u.blood_type, u.allergies, u.date_of_birth FROM consultations c LEFT JOIN users u ON c.patient_id = u.id WHERE c.doctor_id = ?";
     $params = [$decoded["id"]];
     if ($status) { $sql .= " AND c.status = ?"; $params[] = $status; }
     $sql .= " ORDER BY c.appointment_date ASC, c.appointment_time ASC";
@@ -65,7 +65,7 @@ elseif ($method === "POST" && $action === "prescription") {
     $decoded = verifyToken();
     $data = json_decode(file_get_contents("php://input"), true);
     $stmt = $pdo->prepare("INSERT INTO prescriptions (doctor_id, patient_id, consultation_id, diagnosis, medications, instructions, follow_up_date) VALUES (?,?,?,?,?,?,?)");
-    $stmt->execute([$decoded["id"], $data["user_id"], $data["consultation_id"] ?? null, $data["diagnosis"] ?? null, $data["medications"] ?? null, $data["instructions"] ?? null, $data["follow_up_date"] ?? null]);
+    $stmt->execute([$decoded["id"], $data["patient_id"], $data["consultation_id"] ?? null, $data["diagnosis"] ?? null, $data["medications"] ?? null, $data["instructions"] ?? null, $data["follow_up_date"] ?? null]);
     echo json_encode(["message" => "Prescription written.", "id" => $pdo->lastInsertId()]);
 }
 elseif ($method === "GET" && $action === "prescriptions") {

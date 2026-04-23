@@ -11,20 +11,20 @@ $userId = $decoded["id"];
 
 if ($method === "GET" && $action === "upcoming") {
     $today = date("Y-m-d");
-    $stmt = $pdo->prepare("SELECT * FROM appointments WHERE user_id = ? AND appointment_date >= ? AND status = 'scheduled' AND deleted_at IS NULL ORDER BY appointment_date ASC");
+    $stmt = $pdo->prepare("SELECT * FROM appointments WHERE patient_id = ? AND appointment_date >= ? AND status = 'scheduled' AND deleted_at IS NULL ORDER BY appointment_date ASC");
     $stmt->execute([$userId, $today]);
     echo json_encode(["appointments" => $stmt->fetchAll()]);
 }
 
 elseif ($method === "GET" && $action === "one") {
     $id = $_GET["id"] ?? null;
-    $stmt = $pdo->prepare("SELECT * FROM appointments WHERE id = ? AND user_id = ? AND deleted_at IS NULL");
+    $stmt = $pdo->prepare("SELECT * FROM appointments WHERE id = ? AND patient_id = ? AND deleted_at IS NULL");
     $stmt->execute([$id, $userId]);
     echo json_encode(["appointment" => $stmt->fetch()]);
 }
 
 elseif ($method === "GET") {
-    $stmt = $pdo->prepare("SELECT * FROM appointments WHERE user_id = ? AND deleted_at IS NULL ORDER BY appointment_date ASC");
+    $stmt = $pdo->prepare("SELECT * FROM appointments WHERE patient_id = ? AND deleted_at IS NULL ORDER BY appointment_date ASC");
     $stmt->execute([$userId]);
     echo json_encode(["appointments" => $stmt->fetchAll()]);
 }
@@ -60,7 +60,7 @@ elseif ($method === "PUT") {
 
 elseif ($method === "DELETE") {
     $id = $_GET["id"] ?? null;
-    $stmt = $pdo->prepare("UPDATE appointments SET deleted_at = CURRENT_TIMESTAMP WHERE id = ? AND user_id = ?");
+    $stmt = $pdo->prepare("UPDATE appointments SET deleted_at = CURRENT_TIMESTAMP WHERE id = ? AND patient_id = ?");
     $stmt->execute([$id, $userId]);
     echo json_encode(["message" => "Appointment deleted."]);
 }

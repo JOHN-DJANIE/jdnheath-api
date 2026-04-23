@@ -1,9 +1,5 @@
-<<<<<<< HEAD
-﻿<?php
-=======
 <?php
 ob_start();
->>>>>>> 2d9beb9cc7511a4ad17aa9b599aa60dd8d8c9e82
 error_reporting(0); ini_set("display_errors", 0);
 require_once "cors.php";
 require_once "db.php";

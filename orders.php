@@ -11,7 +11,7 @@ $decoded = verifyToken();
 $userId = $decoded["id"];
 
 if ($method === "GET") {
-    $stmt = $pdo->prepare("SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC");
+    $stmt = $pdo->prepare("SELECT * FROM orders WHERE patient_id = ? ORDER BY created_at DESC");
     $stmt->execute([$userId]);
     echo json_encode(["orders" => $stmt->fetchAll()]);
 }
@@ -79,7 +79,7 @@ elseif ($method === "POST") {
     $total = $data["total"] ?? 0;
     if (empty($items)) { http_response_code(400); echo json_encode(["error" => "No items in order."]); exit; }
     $prescription_url = $data["prescription_url"] ?? null;
-    $stmt = $pdo->prepare("INSERT INTO orders (user_id, total, status, prescription_url) VALUES (?, ?, 'processing', ?)");
+    $stmt = $pdo->prepare("INSERT INTO orders (patient_id, total, status, prescription_url) VALUES (?, ?, 'processing', ?)");
     $stmt->execute([$userId, $total, $prescription_url]);
     $orderId = $pdo->lastInsertId();
     // Send push notification

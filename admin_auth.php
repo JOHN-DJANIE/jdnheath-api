@@ -1,10 +1,16 @@
+<<<<<<< HEAD
 ﻿<?php
+=======
+<?php
+ob_start();
+>>>>>>> 2d9beb9cc7511a4ad17aa9b599aa60dd8d8c9e82
 error_reporting(0); ini_set("display_errors", 0);
 require_once "cors.php";
 require_once "db.php";
 require_once "auth_helper.php";
 require_once "ratelimit.php";
 
+require_once "admin_extra.php";
 $method = $_SERVER["REQUEST_METHOD"];
 $action = $_GET["action"] ?? "";
 
@@ -72,8 +78,21 @@ elseif ($method === "PUT" && $action === "doctor") {
     verifyAdmin($pdo);
     $id = $_GET["id"] ?? null;
     $data = json_decode(file_get_contents("php://input"), true);
-    $pdo->prepare("UPDATE doctors SET is_verified = ?, is_active = ? WHERE id = ?")->execute([$data["is_verified"] ?? true, $data["is_active"] ?? true, $id]);
-    echo json_encode(["message" => "Doctor updated."]);
+    $fields=[]; $params=[];
+    if(array_key_exists("is_verified",$data)){$verified=($data["is_verified"] ? 1 : 0);$fields[]="is_verified=?";$params[]=$verified; if($verified){$fields[]="verification_status=?";$params[]="approved";} else{$fields[]="verification_status=?";$params[]="rejected";}}
+    if(array_key_exists("is_active",$data)){$fields[]="is_active=?";$params[]=($data["is_active"] ? "true" : "false");}
+    if(array_key_exists("consultation_fee",$data)){$fields[]="consultation_fee=?";$params[]=$data["consultation_fee"];}
+    if(array_key_exists("name",$data)){$fields[]="name=?";$params[]=$data["name"];}
+    if(array_key_exists("specialty",$data)){$fields[]="specialty=?";$params[]=$data["specialty"];}
+    if(array_key_exists("hospital",$data)){$fields[]="hospital=?";$params[]=$data["hospital"];}
+    if(array_key_exists("location",$data)){$fields[]="location=?";$params[]=$data["location"];}
+    if(array_key_exists("phone",$data)){$fields[]="phone=?";$params[]=$data["phone"];}
+    if(array_key_exists("years_experience",$data)){$fields[]="years_experience=?";$params[]=$data["years_experience"];}
+    if(array_key_exists("bio",$data)){$fields[]="bio=?";$params[]=$data["bio"];}
+    if(empty($fields)){echo json_encode(["error"=>"No fields"]);exit;}
+    $params[]=$id;
+    $pdo->prepare("UPDATE doctors SET ".implode(",",$fields)." WHERE id=?")->execute($params);
+    ob_clean(); echo json_encode(["message"=>"Doctor updated."]);
 }
 elseif ($method === "GET" && $action === "hospitals") {
     verifyAdmin($pdo);
@@ -88,15 +107,16 @@ elseif ($method === "GET" && $action === "products") {
 elseif ($method === "POST" && $action === "product") {
     verifyAdmin($pdo);
     $data = json_decode(file_get_contents("php://input"), true);
-    $stmt = $pdo->prepare("INSERT INTO products (name, category, price, unit, rx, stock, description, manufacturer) VALUES (?,?,?,?,?,?,?,?)");
-    $stmt->execute([$data["name"], $data["category"], $data["price"], $data["unit"] ?? null, $data["rx"] ?? 0, $data["stock"] ?? "in", $data["description"] ?? null, $data["manufacturer"] ?? null]);
+    $stmt = $pdo->prepare("INSERT INTO products (name, category, price, unit, rx_required, stock, stock_quantity, description, manufacturer, is_active) VALUES (?,?,?,?,?,?,?,?,?,TRUE)");
+    $sqty = isset($data["stock_quantity"]) ? intval($data["stock_quantity"]) : ($data["stock"]==="out"?0:($data["stock"]==="low"?5:100)); $stmt->execute([$data["name"], $data["category"], $data["price"], $data["unit"]??null, $data["rx"]??0, $data["stock"]??"in", $sqty, $data["description"]??null, $data["manufacturer"]??null]);
     echo json_encode(["message" => "Product added.", "id" => $pdo->lastInsertId()]);
 }
 elseif ($method === "PUT" && $action === "product") {
     verifyAdmin($pdo);
     $id = $_GET["id"] ?? null;
     $data = json_decode(file_get_contents("php://input"), true);
-    $pdo->prepare("UPDATE products SET name=?, category=?, price=?, unit=?, rx=?, stock=?, description=?, manufacturer=? WHERE id=?")->execute([$data["name"], $data["category"], $data["price"], $data["unit"], $data["rx"] ?? 0, $data["stock"], $data["description"], $data["manufacturer"], $id]);
+    $stockQty = isset($data["stock_quantity"]) ? intval($data["stock_quantity"]) : ($data["stock"] === "out" ? 0 : ($data["stock"] === "low" ? 5 : 100));
+      $pdo->prepare("UPDATE products SET name=?, category=?, price=?, unit=?, rx_required=?, stock=?, stock_quantity=?, description=?, manufacturer=?, is_active=TRUE WHERE id=?")->execute([$data["name"], $data["category"], $data["price"], $data["unit"], $data["rx"] ?? 0, $data["stock"], $stockQty, $data["description"], $data["manufacturer"], $id]);
     echo json_encode(["message" => "Product updated."]);
 }
 elseif ($method === "DELETE" && $action === "product") {
@@ -107,7 +127,7 @@ elseif ($method === "DELETE" && $action === "product") {
 }
 elseif ($method === "GET" && $action === "orders") {
     verifyAdmin($pdo);
-    $stmt = $pdo->prepare("SELECT o.*, u.name as patient_name, u.email as patient_email FROM orders o JOIN users u ON o.user_id = u.id ORDER BY o.created_at DESC"); $stmt->execute();
+    $stmt = $pdo->prepare("SELECT o.*, u.name as patient_name, u.email as patient_email FROM orders o LEFT JOIN users u ON o.patient_id = u.id ORDER BY o.created_at DESC"); $stmt->execute();
     echo json_encode(["orders" => $stmt->fetchAll()]);
 }
 elseif ($method === "PUT" && $action === "order") {
@@ -142,7 +162,17 @@ elseif ($method === "PUT" && $action === "settings") {
     foreach ($data as $key => $value) { $stmt->execute([$key, $value]); }
     echo json_encode(["message" => "Settings updated."]);
 }
-elseif ($method === "POST" && $action === "broadcast") {
+elseif ($method === "POST" && $action === "add_doctor") {
+      verifyAdmin($pdo);
+      $data = json_decode(file_get_contents("php://input"), true);
+      if (empty($data["name"]) || empty($data["email"])) { http_response_code(400); echo json_encode(["error" => "Name and email required"]); exit; }
+      $hash = password_hash($data["password"] ?? "Doctor1234", PASSWORD_BCRYPT);
+      $vstatus = "approved";
+      $stmt = $pdo->prepare("INSERT INTO doctors (name, email, password, specialty, hospital, location, phone, consultation_fee, years_experience, bio, is_verified, is_active, verification_status) VALUES (?,?,?,?,?,?,?,?,?,?,TRUE,TRUE,?)");
+      $stmt->execute([$data["name"], $data["email"], $hash, $data["specialty"] ?? "", $data["hospital"] ?? "", $data["location"] ?? "", $data["phone"] ?? null, $data["consultation_fee"] ?? 0, $data["years_experience"] ?? 0, $data["bio"] ?? "", $vstatus]);
+      echo json_encode(["message" => "Doctor added.", "id" => $pdo->lastInsertId()]);
+  }
+  elseif ($method === "POST" && $action === "broadcast") {
     verifyAdmin($pdo);
     require_once "sms.php";
     $data = json_decode(file_get_contents("php://input"), true);
@@ -151,14 +181,54 @@ elseif ($method === "POST" && $action === "broadcast") {
     if (!$message) { http_response_code(400); echo json_encode(["error" => "Message required."]); exit; }
     $sql = "SELECT phone, name FROM users WHERE phone IS NOT NULL AND phone != ''";
     if ($target === "verified") $sql .= " AND is_verified = true";
-    $uStmt = $pdo->prepare($sql); $uStmt->execute($params); $users = $uStmt->fetchAll();
+    $uStmt = $pdo->prepare($sql); $uStmt->execute([]); $users = $uStmt->fetchAll();
     $sent = 0;
     foreach ($users as $user) { if (sendSMS($user["phone"], $message)) $sent++; }
     echo json_encode(["message" => "Broadcast sent.", "sent" => $sent, "total" => count($users)]);
+}
+// GET CLAIMS
+elseif ($method === "GET" && $action === "claims") {
+    verifyAdmin($pdo);
+    $stmt = $pdo->prepare("SELECT ic.*, u.name as patient_name, u.email as patient_email FROM insurance_claims ic LEFT JOIN users u ON ic.user_id = u.id ORDER BY ic.created_at DESC");
+    $stmt->execute([]);
+    echo json_encode(["claims" => $stmt->fetchAll()]);
+}
+// UPDATE CLAIM
+elseif ($method === "PUT" && $action === "claim") {
+    verifyAdmin($pdo);
+    $id = $_GET["id"] ?? null;
+    if (!$id) { http_response_code(400); echo json_encode(["error" => "Claim ID required"]); exit; }
+    $data = json_decode(file_get_contents("php://input"), true);
+    $pdo->prepare("UPDATE insurance_claims SET status = ?, notes = ? WHERE id = ?")->execute([$data["status"] ?? "pending", $data["notes"] ?? null, $id]);
+    echo json_encode(["message" => "Claim updated."]);
+}
+// ADD HOSPITAL
+elseif ($method === "POST" && $action === "hospital") {
+    verifyAdmin($pdo);
+    $data = json_decode(file_get_contents("php://input"), true);
+    if (empty($data["name"])) { http_response_code(400); echo json_encode(["error" => "Hospital name required"]); exit; }
+    $stmt = $pdo->prepare("INSERT INTO hospitals (name, type, location, region, phone, email, departments, facilities, opening_hours, is_active) VALUES (?,?,?,?,?,?,?,?,?,TRUE)");
+    $stmt->execute([$data["name"], $data["type"] ?? "Government Hospital", $data["location"] ?? "", $data["region"] ?? "Greater Accra", $data["phone"] ?? null, $data["email"] ?? null, $data["departments"] ?? null, $data["facilities"] ?? null, $data["opening_hours"] ?? "24/7"]);
+    echo json_encode(["message" => "Hospital added.", "id" => $pdo->lastInsertId()]);
+}
+// UPDATE HOSPITAL
+elseif ($method === "PUT" && $action === "hospital") {
+    verifyAdmin($pdo);
+    $id = $_GET["id"] ?? null;
+    if (!$id) { http_response_code(400); echo json_encode(["error" => "Hospital ID required"]); exit; }
+    $data = json_decode(file_get_contents("php://input"), true);
+    $pdo->prepare("UPDATE hospitals SET name=?, type=?, location=?, region=?, phone=?, email=?, departments=?, facilities=?, opening_hours=? WHERE id=?")->execute([$data["name"], $data["type"] ?? "Government Hospital", $data["location"] ?? "", $data["region"] ?? "Greater Accra", $data["phone"] ?? null, $data["email"] ?? null, $data["departments"] ?? null, $data["facilities"] ?? null, $data["opening_hours"] ?? "24/7", $id]);
+    echo json_encode(["message" => "Hospital updated."]);
+}
+// DELETE HOSPITAL
+elseif ($method === "DELETE" && $action === "hospital") {
+    verifyAdmin($pdo);
+    $id = $_GET["id"] ?? null;
+    if (!$id) { http_response_code(400); echo json_encode(["error" => "Hospital ID required"]); exit; }
+    $pdo->prepare("DELETE FROM hospitals WHERE id = ?")->execute([$id]);
+    echo json_encode(["message" => "Hospital deleted."]);
 }
 else {
     http_response_code(404);
     echo json_encode(["error" => "Route not found."]);
 }
-
-

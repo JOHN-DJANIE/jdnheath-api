@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 error_reporting(0); ini_set("display_errors", 0);
 require_once "cors.php";
 require_once "db.php";
@@ -42,7 +42,7 @@ elseif ($method === "GET" && $action === "stats") {
     $cq = $pdo->prepare("SELECT (SELECT COUNT(*) FROM consultations) + (SELECT COUNT(*) FROM appointments) as count"); $cq->execute(); $consultations = $cq->fetch()["count"];
     $oq = $pdo->prepare("SELECT COUNT(*) as count FROM orders"); $oq->execute(); $orders = $oq->fetch()["count"];
     $rq = $pdo->prepare("SELECT SUM(total) as total FROM orders"); $rq->execute(); $revenue = $rq->fetch()["total"] ?? 0;
-    $cr = $pdo->prepare("SELECT SUM(total_price) as total FROM consultations WHERE status = ? AND patient_id IS NOT NULL"); $cr->execute(["completed"]); $consult_revenue = $cr->fetch()["total"] ?? 0;
+    $cr = $pdo->prepare("SELECT SUM(total_price) as total FROM consultations WHERE status = ?"); $cr->execute(["completed"]); $consult_revenue = $cr->fetch()["total"] ?? 0;
     $nq = $pdo->prepare("SELECT COUNT(*) as count FROM users WHERE created_at::date = CURRENT_DATE"); $nq->execute(); $new_users_today = $nq->fetch()["count"];
     $pc = $pdo->prepare("SELECT COUNT(*) as count FROM consultations WHERE status = ?"); $pc->execute(["pending"]); $pending_consults = $pc->fetch()["count"];
     echo json_encode(["users" => $users, "doctors" => $doctors, "hospitals" => $hospitals, "consultations" => $consultations, "orders" => $orders, "pharmacy_revenue" => $revenue, "consult_revenue" => $consult_revenue, "new_users_today" => $new_users_today, "pending_consults" => $pending_consults, "total_revenue" => $revenue + $consult_revenue]);
